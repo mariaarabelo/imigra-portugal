@@ -1,0 +1,192 @@
+DROP TABLE IF EXISTS Users;
+DROP TABLE IF EXISTS Administrator;
+DROP TABLE IF EXISTS Moderator;
+DROP TABLE IF EXISTS Author;
+DROP TABLE IF EXISTS Report;
+DROP TABLE IF EXISTS Change;
+DROP TABLE IF EXISTS Tag;
+DROP TABLE IF EXISTS Vote;
+DROP TABLE IF EXISTS Content;
+DROP TABLE IF EXISTS Comment;
+DROP TABLE IF EXISTS Question;
+DROP TABLE IF EXISTS Answer;
+DROP TABLE IF EXISTS Notification;
+DROP TABLE IF EXISTS Report_Notification;
+DROP TABLE IF EXISTS Vote_Notification;
+DROP TABLE IF EXISTS Comment_Notification;
+DROP TABLE IF EXISTS Answer_Notification;
+DROP TABLE IF EXISTS Question_Notification;
+DROP TABLE IF EXISTS Content_Tag;
+DROP TABLE IF EXISTS User_Vote_Content;
+
+
+CREATE TABLE Users  (
+   Id SERIAL NOT NULL,
+   Name TEXT NOT NULL,
+   Email TEXT NOT NULL UNIQUE,
+   Password TEXT NOT NULL,
+   BirthDate TEXT, 
+   RegDate Text DEFAULT CURRENT_DATE,
+   Points INTEGER DEFAULT 0,
+   Picture VARCHAR(205),
+   PRIMARY KEY (Id)
+);
+
+
+
+CREATE TABLE Administrator  (
+   IdUser INTEGER NOT NULL,
+   PRIMARY KEY (IdUser),
+   FOREIGN KEY (IdUser) REFERENCES Users ON DELETE CASCADE
+);
+
+
+CREATE TABLE Author (
+   IdUser INTEGER NOT NULL,
+   IdContent INTEGER NOT NULL,
+   PRIMARY KEY (IdUser, IdContent),
+   FOREIGN KEY (IdUser) REFERENCES Users ON UPDATE CASCADE,
+   FOREIGN KEY (IdContent) REFERENCES Content ON UPDATE CASCADE
+);
+
+
+CREATE TABLE Content (
+   Id SERIAL NOT NULL,
+   Description TEXT NOT NULL,
+   ContentDate TEXT DEFAULT CURRENT_DATE,
+   PRIMARY KEY (Id)
+);
+
+CREATE TABLE Question (
+   IdContent INTEGER NOT NULL,
+   Title Text NOT NULL,
+   PRIMARY KEY (IdContent),
+   FOREIGN KEY (IdContent) REFERENCES Content ON DELETE CASCADE
+);
+
+CREATE TABLE Answer (
+   IdContent INTEGER NOT NULL,
+   IdQuestion INTEGER,
+   Correct INTEGER DEFAULT 0,
+   PRIMARY KEY (IdContent),
+   FOREIGN KEY (IdContent) REFERENCES Content ON DELETE CASCADE,
+   FOREIGN KEY (IdQuestion) REFERENCES Question ON DELETE CASCADE,
+   CHECK(Correct IN (0,1))
+);
+
+CREATE TABLE Comment (
+   IdContent INTEGER NOT NULL,
+   IdQuestion INTEGER,
+   IdAnswer INTEGER,
+   PRIMARY KEY (IdContent),
+   FOREIGN KEY (IdContent) REFERENCES Content ON DELETE CASCADE,
+   FOREIGN KEY (IdQuestion) REFERENCES Question ON DELETE CASCADE,
+   FOREIGN KEY (IdAnswer) REFERENCES Answer ON DELETE CASCADE,
+   CHECK ((IdQuestion IS NOT NULL AND IdAnswer IS NULL) 
+      OR (IdQuestion IS NULL AND IdAnswer IS NOT NULL))
+);
+
+CREATE TABLE Vote  (
+   Id SERIAL NOT NULL,
+   VoteDate TEXT DEFAULT CURRENT_DATE,
+   PRIMARY KEY (Id)
+);
+
+CREATE TABLE User_Vote_Content (
+   IdUser INTEGER NOT NULL,
+   IdVote INTEGER NOT NULL,
+   IdContent INTEGER NOT NULL,
+   PRIMARY KEY (IdUser, IdVote, IdContent),
+   FOREIGN KEY (IdUser) REFERENCES Users ON UPDATE CASCADE,
+   FOREIGN KEY (IdVote) REFERENCES Vote ON UPDATE CASCADE,
+   FOREIGN KEY (IdContent) REFERENCES Content ON UPDATE CASCADE
+);
+
+CREATE TABLE Tag  (
+   Id SERIAL NOT NULL,
+   Description TEXT NOT NULL, 
+   PRIMARY KEY (Id)
+);
+
+CREATE TABLE Content_Tag (
+   IdTag INTEGER NOT NULL,
+   IdContent INTEGER NOT NULL,
+   PRIMARY KEY (IdTag, IdContent),
+   FOREIGN KEY (IdTag) REFERENCES Tag ON UPDATE CASCADE,
+   FOREIGN KEY (IdContent) REFERENCES Content ON UPDATE CASCADE
+);
+
+CREATE TABLE Change  (
+   Id SERIAL NOT NULL,
+   IdContent INTEGER NOT NULL,
+   Description TEXT NOT NULL,
+   ChangeDate TEXT DEFAULT CURRENT_DATE,
+   PRIMARY KEY (Id),
+   FOREIGN KEY (IdContent) REFERENCES Content ON UPDATE CASCADE
+);
+
+
+CREATE TABLE Moderator  (
+   Id SERIAL NOT NULL,
+   Name TEXT NOT NULL,
+   Email TEXT NOT NULL UNIQUE,
+   Password TEXT NOT NULL,
+   BirthDate TEXT, 
+   RegDate TEXT DEFAULT CURRENT_DATE,
+   Picture VARCHAR (205),
+   PRIMARY KEY (Id)
+);
+  
+
+CREATE TABLE Report  (
+   Id SERIAL NOT NULL,
+   IdUser INTEGER NOT NULL,
+   IdContent INTEGER NOT NULL,
+   IdModerator INTEGER,
+   Description TEXT NOT NULL,
+   ReportDate TEXT DEFAULT CURRENT_DATE,
+   PRIMARY KEY (Id),
+   FOREIGN KEY (IdUser) REFERENCES Users ON UPDATE CASCADE,
+   FOREIGN KEY (IdContent) REFERENCES Content ON UPDATE CASCADE,
+   FOREIGN KEY (IdModerator) REFERENCES Moderator ON UPDATE CASCADE
+);
+
+
+CREATE TABLE Notification  (
+   Id SERIAL NOT NULL,
+   IdUser INTEGER,
+   IdModerator INTEGER,
+   Description TEXT NOT NULL,
+   NotificationDate TEXT DEFAULT CURRENT_DATE,
+   PRIMARY KEY (Id),
+   FOREIGN KEY (IdUser) REFERENCES Users ON UPDATE CASCADE,
+   FOREIGN KEY (IdModerator) REFERENCES Moderator ON UPDATE CASCADE,
+      CHECK ((IdUser IS NOT NULL AND IdModerator IS NULL) 
+      OR (IdUser IS NULL AND IdModerator IS NOT NULL))
+);
+
+
+CREATE TABLE Vote_Notification (
+   IdNotification INTEGER NOT NULL,
+   PRIMARY KEY (IdNotification),
+   FOREIGN KEY (IdNotification) REFERENCES Notification ON DELETE CASCADE
+);
+
+CREATE TABLE Answer_Notification (
+   IdNotification INTEGER NOT NULL,
+   PRIMARY KEY (IdNotification),
+   FOREIGN KEY (IdNotification) REFERENCES Notification ON DELETE CASCADE 
+); 
+
+CREATE TABLE Comment_Notification (
+   IdNotification INTEGER NOT NULL,
+   PRIMARY KEY (IdNotification),
+   FOREIGN KEY (IdNotification) REFERENCES Notification ON DELETE CASCADE
+); 
+
+
+CREATE TABLE Report_Notification (
+   IdNotification INTEGER NOT NULL,
+   PRIMARY KEY (IdNotification),
+   FOREIGN KEY (IdNotification) REFERENCES Notification ON DELETE CASCADE
+);    

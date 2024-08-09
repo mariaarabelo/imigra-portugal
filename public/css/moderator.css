@@ -1,0 +1,105 @@
+:root {
+    --dark-green: #064B38;
+    --light-green: #0A7B68;
+  }
+  
+/* moderator*/
+
+  
+#moderator-header h2 {
+    text-align: center;
+    font-size: 30px;
+    margin-left: 36px;
+    margin-top: 30px;
+  }
+  
+
+.moderator-reports ul {
+    list-style-type: none;
+    padding: 0;
+  }
+
+.report {
+    list-style: none;
+}
+  
+.moderator-reports li {
+    background-color: #f2f2f2;
+    padding: 10px;
+    margin: 5px 0;
+    border-radius: 5px;
+}
+  
+  .moderator-reports p {
+    text-align: center;
+    font-style: italic;
+  }
+  
+  #tags-header h2 {
+    font-size: 30px;
+    margin-left: 36px;
+    margin-top: 30px;
+  }
+  
+  /* Estilizando a lista de tags do moderador */
+  .moderator-tag ul {
+    list-style: none;
+    padding: 0;
+  }
+  
+  .moderator-tag li {
+    display: inline-block;
+    margin-right: 20px;
+  }
+  
+  .moderator-tag a {
+    text-decoration: none;
+    padding: 10px 20px;
+    border-radius: 5px;
+    background-color: #064B38;
+    color: #F1FEF7;
+    transition: background-color 0.3s ease, color 0.3s ease;
+  }
+  
+  .moderator-tag a:hover {
+    background-color: #0A7B68;
+    color: #F1FEF7;
+  }
+  
+  .moderator-tag {
+    display: flex;
+      justify-content: center;
+      align-items: center;
+      margin-top: 20px;
+  }
+  
+  .moderator-tag ul {
+    display: flex;
+    list-style: none;
+    padding: 0;
+  }
+
+  .moderator-tag {
+    border-top: solid 1px;
+    border-bottom: solid 2px;
+    padding-top: 24px;
+    border-radius: 12px;
+  }
+  
+  .moderator-tag a {
+    background-color: #064B38;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-left: 28px;
+    padding: 32px;
+    border-radius: 28px;
+    box-shadow: 2px 2px 3px #5d5959;
+    transition: background-color 0.3s ease;
+  }
+  
+  .moderator-tag a:hover {
+    background-color: #d5e7dd;
+    color: #064B38;
+  }
+  

@@ -1,0 +1,75 @@
+:root {
+    --dark-green: #064B38;
+    --light-green: #0A7B68;
+  }
+
+i:hover {
+    cursor: pointer;
+}
+
+#email-update {
+    display: flex;
+    margin: 0.5 0;
+}
+
+#email-update input{
+    margin: 0 3em;
+}
+
+i {
+    padding: 0.3em;
+}
+
+button {
+    background-color: #0A7B68;
+    padding: 0 1em;
+}
+
+.card-header {
+    text-align: center;
+    font-weight: 700;
+    font-size: 1.2em;
+    margin-bottom: 1em;
+}
+
+.user-details p {
+    text-align: left;
+}
+
+#container {
+    margin: 0, auto;
+}
+
+#inline-sections {
+    display:flex;
+    justify-content: space-around;
+}
+
+.content-type {
+    width: 30%;
+    padding: 0 2em;
+}
+
+.content-type:nth-child(2){
+    border-left: 2px solid var(--light-green);
+    border-right: 2px solid var(--light-green);
+}
+
+h3 {
+    font-size: 1.5em;
+    font-weight: 700;
+    margin-bottom: 5em;
+    text-align: center;
+}
+
+h4 {
+    font-size: 1.2em;
+    font-weight: 600;
+    margin: 0.5em;
+}
+
+.description {
+    margin-bottom: 2em;
+}
+
+

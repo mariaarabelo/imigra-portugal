@@ -1,0 +1,899 @@
+openapi: 3.0.0
+
+info:
+  version: '1.0'
+  title: 'LBAW ImigraPortugal Web API'
+  description: 'Web Resources Specification (A7) for ImigraPortugal'
+
+servers:
+- url: http://lbaw.fe.up.pt
+  description: Production server
+
+tags:
+  - name: 'M01: Authentication and Individual Profile'
+  - name: 'M02: Question and Answer Management'
+  - name: 'M03: User Groups and Permissions'
+  - name: 'M04: Content Moderation'
+  - name: 'M05: User Administration'
+
+paths:
+
+  /login:
+    get:
+      operationId: R101
+      summary: 'R101: Login Form'
+      description: 'Provide login form. Access: PUB'
+      tags:
+        - 'M01: Authentication and Individual Profile'
+      responses:
+        '200':
+          description: 'Ok. Show log-in UI'
+    post:
+      operationId: R102
+      summary: 'R102: Login Action'
+      description: 'Processes the login form submission. Access: PUB'
+      tags:
+        - 'M01: Authentication and Individual Profile'
+ 
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              properties:
+                email:          
+                  type: string
+                password:    
+                  type: string
+              required:
+                - email
+                - password
+ 
+      responses:
+        '302':
+          description: 'Redirect after processing the login credentials.'
+          headers:
+            Location:
+              schema:
+                type: string
+              examples:
+                302Success:
+                  description: 'Successful authentication. Redirect to user profile.'
+                  value: '/users/{id}'
+                302Error:
+                  description: 'Failed authentication. Redirect to login form.'
+                  value: '/login'
+ 
+
+  /logout:
+    post:
+      operationId: R103
+      summary: 'R103: Logout Action'
+      description: 'Logout the current authenticated used. Access: USR, MOD, ADM'
+      tags:
+        - 'M01: Authentication and Individual Profile'
+      responses:
+        '302':
+          description: 'Redirect after processing logout.'
+          headers:
+            Location:
+              schema:
+                type: string
+              examples:
+                302Success:
+                  description: 'Successful logout. Redirect to login form.'
+                  value: '/login'
+
+
+  /register:
+    get:
+      operationId: R104
+      summary: 'R104: Register Form'
+      description: 'Provide new user registration form. Access: PUB'
+      tags:
+        - 'M01: Authentication and Individual Profile'
+      responses:
+        '200':
+          description: 'Ok. Show sign-up UI'
+
+    post:
+      operationId: R105
+      summary: 'R105: Register Action'
+      description: 'Processes the new user registration form submission. Access: PUB'
+      tags:
+        - 'M01: Authentication and Individual Profile'
+
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                email:
+                  type: string
+                picture:
+                  type: string
+                  format: binary
+              required:
+                - email
+                - password
+
+      responses:
+        '302':
+          description: 'Redirect after processing the new user information.'
+          headers:
+            Location:
+              schema:
+                type: string
+              examples:
+                302Success:
+                  description: 'Successful authentication. Redirect to user profile.'
+                  value: '/users/{id}'
+                302Failure:
+                  description: 'Failed authentication. Redirect to login form.'
+                  value: '/login'
+
+  /users/{id}:
+    get:
+      operationId: R106
+      summary: 'R106: View user profile'
+      description: 'Show the individual user profile. Access: USR, MOD, ADM'
+      tags:
+        - 'M01: Authentication and Individual Profile'
+
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: integer
+          required: true
+
+      responses:
+        '200':
+          description: 'Ok. Show view profile UI'
+ 
+
+
+  /content/questions:
+    get:
+      operationId: R201
+      summary: 'R201: Search Questions'
+      description: 'Searches for questions and returns the results as JSON. Access: PUB, USR, ADM, MOD'
+      tags:
+        - 'M02: Question and Answer Management'
+
+      parameters:
+        - in: query
+          name: query
+          description: String to use for full-text search
+          schema:
+            type: string
+          required: false
+        - in: query
+          name: tag
+          description: Filter questions by tag
+          schema:
+            type: string
+          required: false
+        - in: query
+          name: date
+          description: Filter questions by date
+          schema:
+            type: string
+          required: false
+        - in: query
+          name: popular
+          description: Filter popular questions
+          schema:
+            type: boolean
+          required: false
+
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    id:
+                      type: string
+                    title:
+                      type: string
+                    content:
+                      type: string
+                    user:
+                      type: object
+                      properties:
+                        id:
+                          type: integer
+                        username:
+                          type: string
+                    tags:
+                      type: array
+                      items:
+                        type: string
+                example:
+                  - id: 1
+                    title: 'Qual e a situacao do emprego?'
+                    content: 'Procurando Emprego em Portugal'
+                    user:
+                      id: 123
+                      username: 'john_doe'
+                    tags:
+                      - 'yaml'
+                  - id: 2
+                    title: 'Melhores Bairros para Morar em Lisboa?'
+                    content: 'Acabo de chegar em Portugal ...'
+                    user:
+                      id: 456
+                      username: 'jane_smith'
+                    tags:
+                      - 'rest-api'
+  
+  
+  /content/question:
+    post:
+      operationId: R202
+      summary: 'R202: Post Question'
+      description: 'Post a new question. Acecss: URS, ADM'
+      tags: 
+        - 'M02: Question and Answer Management'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                title:
+                  type: string
+                content:
+                  type: string
+                tags:
+                  type: array
+                  items:
+                    type: string
+      responses:
+        '202':
+          description: 'Question posted successfully.'
+        '400':
+          description: 'Bad Request. Invalid data provided.'
+        '401':
+          description: 'Unauthorized. You must be authenticated to post a question.'
+          
+  
+  /content/question/edit/{questionId}:
+    put:
+      operationId: R203
+      summary: 'R203: Edit Question'
+      description: 'Edit an existing question. Access: USR, ADM, OWN'
+      tags:
+        - 'M02: Question and Answer Management'
+
+      parameters:
+        - in: path
+          name: questionId
+          schema:
+            type: integer
+          required: true
+
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                title:
+                  type: string
+                content:
+                  type: string
+                tags:
+                  type: array
+                  items:
+                    type: string
+
+      responses:
+        '203':
+          description: 'Question edited successfully.'
+        '400':
+          description: 'Bad Request. Invalid data provided.'
+        '401':
+          description: 'Unauthorized. You must be the owner of the question to edit.'
+        '404':
+          description: 'Not Found. Question not found.'
+  
+  
+  /content/answer/{questionId}:
+    post:
+      operationId: R204
+      summary: 'R204: Answer to a Question'
+      description: 'Answer to a specif question. Access: USR, ADM'
+      tags:
+        - 'M02: Question and Answer Management'
+      parameters:
+        - in: path
+          name: questionId
+          schema:
+            type: integer
+          required: true
+          description: 'ID of the questions to witch the answer will be posted'
+
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                content:
+                  type: string
+
+      responses:
+        '204':
+          description: 'Answer posted successfully.'
+        '400':
+          description: 'Bad Request. Invalid data provided.'
+        '401':
+          description: 'Unauthorized. You must be authenticated to post an answer.'
+        '404':
+          description: 'Not Found. Question not found.' 
+        
+  
+  /content/answer/edit/{answerId}:
+    put:
+      operationId: R205
+      summary: 'R205 Edit Answer'
+      description: 'Edit an existing answer. Access: USR, ADM, OWN'
+      tags:
+        - 'M02: Question and Answer Management'
+
+      parameters:
+        - in: path
+          name: answerId
+          schema:
+            type: integer
+          required: true
+
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                title:
+                  type: string
+                content:
+                  type: string
+                tags:
+                  type: array
+                  items:
+                    type: string
+
+      responses:
+        '205':
+          description: 'Answer edited successfully.'
+        '400':
+          description: 'Bad Request. Invalid data provided.'
+        '401':
+          description: 'Unauthorized. You must be the owner of the answer to edit.'
+        '404':
+          description: 'Not Found. Question not found.'
+      
+      
+  /content/comment/{questionId}:
+    post:
+      operationId: R206
+      summary: 'R206 Comment on Question'
+      description: 'Comment on a specif question. Acess: URS, ADM'
+      tags:
+        - 'M02: Question and Answer Management'
+        
+      parameters:
+        - in: path
+          name: questionId
+          schema:
+            type: integer
+          required: true
+          description: 'ID of the questions to witch the comment will be posted'
+          
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                content:
+                  type: string
+                  
+      responses:
+        '206':
+          description: 'Comment posted successfully.'
+        '400':
+          description: 'Bad Request. Invalid data provided.'
+        '401':
+          description: 'Unauthorized. You must be authenticated to comment an question.'
+        '404':
+          description: 'Not Found. Question not found.'  
+  
+  /content/comment/{answerId}:
+    post:
+      operationId: R207
+      summary: 'R207 Comment on Answer'
+      description: 'Comment on a specif answer. Acess: URS, ADM'
+      tags:
+        - 'M02: Question and Answer Management'
+        
+      parameters:
+        - in: path
+          name: answerId
+          schema:
+            type: integer
+          required: true
+          description: 'ID of the answers to witch the comment will be posted'
+          
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                content:
+                  type: string
+                  
+      responses:
+        '207':
+          description: 'Comment posted successfully.'
+        '400':
+          description: 'Bad Request. Invalid data provided.'
+        '401':
+          description: 'Unauthorized. You must be authenticated to comment an answer.'
+        '404':
+          description: 'Not Found.Answer not found.' 
+  
+  
+  /content/comment/edit/{commentId}:
+    put:
+      operationId: R208
+      summary: 'R208 Edit Comment'
+      description: 'Edit an existing comment. Access: USR, ADM, OWN'
+      tags:
+        - 'M02: Question and Answer Management'
+
+      parameters:
+        - in: path
+          name: commentId
+          schema:
+            type: integer
+          required: true
+
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                title:
+                  type: string
+                content:
+                  type: string
+                tags:
+                  type: array
+                  items:
+                    type: string
+
+      responses:
+        '208':
+          description: 'Comment edited successfully.'
+        '400':
+          description: 'Bad Request. Invalid data provided.'
+        '401':
+          description: 'Unauthorized. You must be the owner of the comment to edit.'
+        '404':
+          description: 'Not Found. Comment not found.'
+      
+    
+  /content/vote/{questionId}:
+    post:
+      operationId: R209
+      summary: 'R209: Vote on Question'
+      description: 'Vote on a question as an Authenticated User. Access: USR, ADM'
+      tags:
+        - 'M02: Question and Answer Management'
+
+      parameters:
+        - in: path
+          name: questionId
+          schema:
+            type: integer
+          required: true
+
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                vote:
+                  type: integer
+                  enum: [1, -1]
+
+      responses:
+        '209':
+          description: 'Vote recorded successfully.'
+        '400':
+          description: 'Bad Request. Invalid data provided.'
+        '401':
+          description: 'Unauthorized. You must be authenticated to vote on question.'
+
+  
+  /content/vote/{answerId}:
+    post:
+      operationId: R210
+      summary: 'R210: Vote on Answer'
+      description: 'Vote on a answer as an Authenticated User. Access: USR, ADM'
+      tags:
+        - 'M02: Question and Answer Management'
+
+      parameters:
+        - in: path
+          name: answerId
+          schema:
+            type: integer
+          required: true
+
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                vote:
+                  type: integer
+                  enum: [1, -1]
+
+      responses:
+        '210':
+          description: 'Vote recorded successfully.'
+        '400':
+          description: 'Bad Request. Invalid data provided.'
+        '401':
+          description: 'Unauthorized. You must be authenticated to vote on answer.'
+  
+  /content/vote/{commentId}:
+    post:
+      operationId: R211
+      summary: 'R211: Vote on Comment'
+      description: 'Vote on a answer as an Authenticated User. Access: USR, ADM'
+      tags:
+        - 'M02: Question and Answer Management'
+
+      parameters:
+        - in: path
+          name: commentId
+          schema:
+            type: integer
+          required: true
+
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                vote:
+                  type: integer
+                  enum: [1, -1]
+
+      responses:
+        '211':
+          description: 'Vote recorded successfully.'
+        '400':
+          description: 'Bad Request. Invalid data provided.'
+        '401':
+          description: 'Unauthorized. You must be authenticated to vote on a comment.'
+          
+
+  /content/delete/{questionId}:
+    delete:
+      operationId: R212
+      summary: 'R212: Delete Question'
+      description: 'Delete content as an Author. Access: OWN'
+      tags:
+        - 'M02: Question and Answer Management'
+
+      parameters:
+        - in: path
+          name: questionId
+          schema:
+            type: integer
+          required: true
+
+      responses:
+        '212':
+          description: 'Question deleted successfully.'
+        '400':
+          description: 'Bad Request. Invalid data provided.'
+        '401':
+          description: 'Unauthorized. You must be the owner of the Question to delete.'
+        '404':
+          description: 'Not Found. Question not found.'
+          
+  /content/delete/{answerId}:
+    delete:
+      operationId: R213
+      summary: 'R213: Delete Answer'
+      description: 'Delete answer as an Author. Access: OWN'
+      tags:
+        - 'M02: Question and Answer Management'
+
+      parameters:
+        - in: path
+          name: answerId
+          schema:
+            type: integer
+          required: true
+
+      responses:
+        '213':
+          description: 'Answer deleted successfully.'
+        '400':
+          description: 'Bad Request. Invalid data provided.'
+        '401':
+          description: 'Unauthorized. You must be the owner of the Answer to delete.'
+        '404':
+          description: 'Not Found. Answer not found.'
+          
+  /content/delete/{commentId}:
+    delete:
+      operationId: R214
+      summary: 'R214: Delete Comment'
+      description: 'Delete comment as an Author. Access: OWN'
+      tags:
+        - 'M02: Question and Answer Management'
+
+      parameters:
+        - in: path
+          name: commentId
+          schema:
+            type: integer
+          required: true
+
+      responses:
+        '214':
+          description: 'Comment deleted successfully.'
+        '400':
+          description: 'Bad Request. Invalid data provided.'
+        '401':
+          description: 'Unauthorized. You must be the owner of the Comment to delete.'
+        '404':
+          description: 'Not Found. Comment not found.'
+
+
+  /moderation:
+    post:
+      operationId: R401
+      summary: 'R401: Submit Content Report'
+      description: 'Submit a report for inappropriate content. Access: USR, ADM'
+      tags:
+        - 'M04: Content Moderation'
+
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                contentId:
+                  type: integer
+                reason:
+                  type: string
+
+      responses:
+        '202':
+          description: 'Accepted. Content report submitted.'
+        '400':
+          description: 'Bad Request. Invalid data provided.'
+          
+
+  /moderation/delete/{contentId}:
+    delete:
+      operationId: R402
+      summary: 'R402: Delete Content'
+      description: 'Delete content as a Moderator. Access: MOD'
+      tags:
+        - 'M04: Content Moderation'
+
+      parameters:
+        - in: path
+          name: contentId
+          schema:
+            type: integer
+          required: true
+
+      responses:
+        '202':
+          description: 'Content deleted successfully.'
+        '400':
+          description: 'Bad Request. Invalid data provided.'
+
+
+
+  /moderation/edit-tags/{questionId}:
+    post:
+      operationId: R403
+      summary: 'R403: Edit Question Tags'
+      description: 'Edit question tags as a Moderator. Access: MOD'
+      tags:
+        - 'M04: Content Moderation'
+
+      parameters:
+        - in: path
+          name: questionId
+          schema:
+            type: integer
+          required: true
+
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                type: string
+
+      responses:
+        '202':
+          description: 'Tags edited successfully.'
+        '400':
+          description: 'Bad Request. Invalid data provided.'
+  
+
+  /admin/users:
+    get:
+      operationId: R501
+      summary: 'R501: List Users'
+      description: 'List and search for user accounts. Access: ADM'
+      tags:
+        - 'M05: User Administration'
+
+      parameters:
+        - in: query
+          name: query
+          description: String to use for user search
+          schema:
+            type: string
+          required: false
+
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    id:
+                      type: integer
+                    username:
+                      type: string
+                    email:
+                      type: string
+                example:
+                  - id: 123
+                    username: 'john_doe'
+                    email: 'john@example.com'
+                  - id: 456
+                    username: 'jane_smith'
+                    email: 'jane@example.com'
+
+
+  /admin/users/{id}:
+    get:
+      operationId: R502
+      summary: 'R502: View User Details'
+      description: 'View user account details. Access: ADM'
+      tags:
+        - 'M05: User Administration'
+
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: integer
+          required: true
+
+      responses:
+        '200':
+          description: 'Success. Show User Details UI'
+          
+
+  /admin/users/block/{userId}:
+    post:
+      operationId: R503
+      summary: 'R503: Block User'
+      description: 'Block a user as an Administrator. Access: ADM'
+      tags:
+        - 'M05: User Administration'
+
+      parameters:
+        - in: path
+          name: userId
+          schema:
+            type: integer
+          required: true
+
+      responses:
+        '202':
+          description: 'User blocked successfully.'
+        '400':
+          description: 'Bad Request. Invalid data provided.'
+        '404':
+          description: 'Not Found. User not found.'
+
+
+  /admin/users/unblock/{userId}:
+    post:
+      operationId: R504
+      summary: 'R504: Unblock User'
+      description: 'Unblock a user as an Administrator. Access: ADM'
+      tags:
+        - 'M05: User Administration'
+
+      parameters:
+        - in: path
+          name: userId
+          schema:
+            type: integer
+          required: true
+
+      responses:
+        '202':
+          description: 'User unblocked successfully.'
+        '400':
+          description: 'Bad Request. Invalid data provided.'
+        '404':
+          description: 'Not Found. User not found.'
+
+
+  /admin/users/delete/{userId}:
+    delete:
+      operationId: R505
+      summary: 'R505: Delete User'
+      description: 'Delete a user as an Administrator. Access: ADM'
+      tags:
+        - 'M05: User Administration'
+
+      parameters:
+        - in: path
+          name: userId
+          schema:
+            type: integer
+          required: true
+
+      responses:
+        '202':
+          description: 'User deleted successfully.'
+        '400':
+          description: 'Bad Request. Invalid data provided.'
+        '404':
+          description: 'Not Found. User not found.'
+
